@@ -277,3 +277,125 @@ namespace DetectiveGame
                 }
             }
         }
+		private void ShowInventory()
+		{
+			Console.WriteLine("Ваш iнвентар:");
+			if (inventory.Count == 0)
+			{
+				Console.WriteLine("iнвентар порожнiй.");
+			}
+			else
+			{
+				foreach (var item in inventory.Distinct())
+				{
+					Console.WriteLine("- " + item);
+				}
+			}
+			Console.WriteLine();
+		}
+
+		private void ShowJournal()
+		{
+			Console.WriteLine("Журнал подiй:");
+			if (journal.Count == 0)
+			{
+				Console.WriteLine("Журнал порожнiй.");
+			}
+			else
+			{
+				foreach (var entry in journal)
+				{
+					Console.WriteLine("- " + entry);
+				}
+			}
+			Console.WriteLine();
+		}
+
+		private void ShowEvidence()
+		{
+			Console.WriteLine("Знайденi докази:");
+			if (evidences.Count == 0)
+			{
+				Console.WriteLine("Докази ще не знайденi.");
+			}
+			else
+			{
+				foreach (var ev in evidences.Distinct())
+				{
+					Console.WriteLine("- " + ev.Description);
+				}
+			}
+			Console.WriteLine();
+		}
+
+		private void AccuseSuspect()
+		{
+			Console.WriteLine("Кого ви хочете звинуватити?");
+			for (int i = 0; i < suspects.Count; i++)
+			{
+				Console.WriteLine($"{i + 1}. {suspects[i].Name}");
+			}
+
+			if (int.TryParse(Console.ReadLine(), out int index) && index >= 1 && index <= suspects.Count)
+			{
+				Console.WriteLine();
+
+				if (suspects[index - 1] == killer)
+				{
+					Console.WriteLine($"Ви правильно розкрили справу! Винний — {killer.Name}.");
+					score += 20;
+				}
+				else
+				{
+					Console.WriteLine($"Невiрний вибiр. Справжнiй злочинець — {killer.Name}.");
+					score -= 10;
+				}
+
+				journal.Add($"Звинуватили: {suspects[index - 1].Name}");
+				Console.WriteLine($"Ваш фiнальний рахунок: {score} балiв.\n");
+				caseSolved = true;
+			}
+			else
+			{
+				Console.WriteLine("Невiрний вибiр.\n");
+			}
+		}
+
+		private void AnalyzeEvidence()
+		{
+			Console.WriteLine("Аналiз доказiв...");
+			int analysisTime = 3000 - (skills.AnalysisSpeed * 500);
+			Thread.Sleep(Math.Max(1000, analysisTime));
+
+			Console.WriteLine("Експерт провiв аналiз i встановив, що вбивство сталося приблизно о 22:30.");
+			journal.Add("Проведено аналiз доказiв");
+			score += 2;
+
+			Console.WriteLine("Пiдказка: шукайте зв'язок мiж доказами та пiдозрюваними.");
+		}
+
+		private void InterrogateSuspect()
+		{
+			Console.WriteLine("Оберiть пiдозрюваного:");
+			for (int i = 0; i < suspects.Count; i++)
+			{
+				Console.WriteLine($"{i + 1}. {suspects[i].Name}");
+			}
+
+			if (int.TryParse(Console.ReadLine(), out int index) && index >= 1 && index <= suspects.Count)
+			{
+				Console.WriteLine();
+				suspects[index - 1].Interrogate(skills.DetectLies);
+				journal.Add($"Допитано пiдозрюваного: {suspects[index - 1].Name}");
+				score += 3;
+
+				int timeCost = 1 - (skills.FastInterrogation);
+				timeLeft -= Math.Max(0, timeCost);
+
+				Console.WriteLine("Пiдказка: звернiть увагу на деталi в заявах пiдозрюваних.");
+			}
+			else
+			{
+				Console.WriteLine("Невiрний вибiр.\n");
+			}
+		}
