@@ -399,3 +399,121 @@ namespace DetectiveGame
 				Console.WriteLine("Невiрний вибiр.\n");
 			}
 		}
+
+        private void ExploreCurrentLocation()
+        {
+            Console.WriteLine($"{currentLocation.Name}:");
+            string foundItem = currentLocation.Explore(evidences);
+            journal.Add($"Дослiджено локацiю: {currentLocation.Name}");
+
+            int itemChance = 30 + (skills.SearchSkill * 10);
+            if (rnd.Next(100) < itemChance)
+            {
+                string item = currentLocation.FindItem();
+                inventory.Add(item);
+                Console.WriteLine($"Знайдено предмет: {item}");
+            }
+
+            score += 5;
+        }
+
+        private void UpgradeSkills()
+        {
+            Console.WriteLine("Доступнi навички для розвитку:");
+            Console.WriteLine("1. Швидкiсть аналiзу доказiв");
+            Console.WriteLine("2. Вмiння розпiзнавати брехню");
+            Console.WriteLine("3. Кращий обшук (бiльше шансiв знайти предмети)");
+            Console.WriteLine("4. Швидкий допит (менше часу витрачається)");
+            Console.WriteLine("Вибiр:");
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    skills.AnalysisSpeed++;
+                    Console.WriteLine("Швидкiсть аналiзу збiльшено.\n");
+                    break;
+                case "2":
+                    skills.DetectLies++;
+                    Console.WriteLine("Вмiння розпiзнавати брехню збiльшено.\n");
+                    break;
+                case "3":
+                    skills.SearchSkill++;
+                    Console.WriteLine("Навик пошуку збiльшено.\n");
+                    break;
+                case "4":
+                    skills.FastInterrogation++;
+                    Console.WriteLine("Швидкiсть допиту збiльшено.\n");
+                    break;
+                default:
+                    Console.WriteLine("Невiрний вибiр.\n");
+                    break;
+            }
+        }
+
+        private void SubmitSampleToLab()
+        {
+            Console.WriteLine("Оберiть зразок для здачi в лабораторiю:");
+            Console.WriteLine("1. Волосся");
+            Console.WriteLine("2. Пляма");
+            Console.WriteLine("3. Зразок кровi");
+            Console.WriteLine("4. Зразок одягу");
+            Console.WriteLine("5. iнший предмет з iнвентарю");
+
+            string choice = Console.ReadLine();
+            string report = "";
+            Suspect matchingSuspect = killer;
+
+            report = $"Зразок ({choice}): результати очiкуються.";
+
+            labReports.Add(report);
+            Console.WriteLine(report);
+            Console.WriteLine("Чекайте результати...");
+            Thread.Sleep(2000);
+
+            ProvideLabResults(matchingSuspect);
+            journal.Add("Здано зразки в лабораторiю.");
+            score += 5;
+        }
+
+        private void ProvideLabResults(Suspect matchingSuspect)
+        {
+            string[] results =
+            {
+        "Аналiз показав, що волосся належить {0}. Це важливий доказ.",
+        "Аналiз плями виявив слiди кровi, якi належать {0}.",
+        "Аналiз зразка кровi пiдтвердив, що вiн належить {0}.",
+        "Зразок одягу мiстить слiди волосся {0}.",
+        "Зразок з iнвентарю вказує на {0}, що було на мiсцi злочину.",
+        "Аналiз матерiалiв показав, що на зразку є ДНК {0}."
+      };
+
+            if (matchingSuspect != null)
+            {
+                string result = string.Format(results[rnd.Next(results.Length)], matchingSuspect.Name);
+                Console.WriteLine("Звiт експерта готовий.");
+                Console.WriteLine("Результати: " + result);
+            }
+            else
+            {
+                Console.WriteLine("На жаль, не знайдено жодних збiгiв з пiдозрюваними.");
+            }
+        }
+
+        private void GiveHint()
+        {
+            if (score >= 5)
+            {
+                Console.WriteLine("Пiдказка: пiдозрюванi можуть надавати важливу iнформацiю, якщо запитати їх про деталi.");
+                journal.Add("Отримано пiдказку");
+                score -= 5;
+                Console.WriteLine();
+                timeLeft--;
+            }
+            else
+            {
+                Console.WriteLine("У вас недостатньо балiв, щоб використати пiдсказку!");
+            }
+        }
+    }
+}
