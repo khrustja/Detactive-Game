@@ -162,3 +162,118 @@ namespace DetectiveGame
 		  "Будь ласка, звернiться до когось iншого, хто мiг його бачити."
 		})
 	  }, new List<string> { "Офiс", "Кафе", "Гардеробна", "Темний коридор", "Секретна кiмната" }));
+            var selectedCase = cases[rnd.Next(cases.Count)];
+            Console.WriteLine($"Справу розпочато. Жертва: {selectedCase.Victim}, вбивство у закритiй кiмнатi.");
+            Console.WriteLine("Пiдозрюванi: " + string.Join(", ", selectedCase.Suspects.Select(s => s.Name)) + ".");
+            Console.WriteLine();
+
+            foreach (var locationName in selectedCase.Locations)
+            {
+                locations.Add(new Location(locationName));
+            }
+
+            suspects = selectedCase.Suspects;
+            killer = suspects[rnd.Next(suspects.Count)];
+            Console.WriteLine($"(Секретно: Випадково обраний вбивця — {killer.Name})");
+        }
+        public void MainLoop()
+        {
+            while (!caseSolved && timeLeft > 0)
+            {
+                Console.WriteLine($"Часу залишилось: {timeLeft} ходiв");
+
+                if (currentLocation == null)
+                {
+                    Console.WriteLine("Оберiть локацiю:");
+                    for (int i = 0; i < locations.Count; i++)
+                    {
+                        Console.WriteLine($"{i + 1}. {locations[i].Name}");
+                    }
+
+                    if (int.TryParse(Console.ReadLine(), out int index) && index >= 1 && index <= locations.Count)
+                    {
+                        currentLocation = locations[index - 1];
+                        Console.WriteLine($"Ви обрали локацiю: {currentLocation.Name}");
+                        currentLocation.Describe();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Невiрний вибiр.\n");
+                        continue;
+                    }
+                }
+
+                Console.WriteLine("1. Дослiдити локацiю");
+                Console.WriteLine("2. Допитати пiдозрюваного");
+                Console.WriteLine("3. Проаналiзувати докази");
+                Console.WriteLine("4. Звинуватити пiдозрюваного");
+                Console.WriteLine("5. Перевiрити оцiнку");
+                Console.WriteLine("6. Переглянути список доказiв");
+                Console.WriteLine("7. Переглянути журнал подiй");
+                Console.WriteLine("8. Отримати пiдказку (-5 балiв)");
+                Console.WriteLine("9. Перевiрити iнвентар");
+                Console.WriteLine("10. Розвинути навички");
+                Console.WriteLine("11. Здати зразки в лабораторiю");
+                Console.WriteLine("12. Вийти з гри");
+
+                string choice = Console.ReadLine();
+                Console.WriteLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        ExploreCurrentLocation();
+                        timeLeft--;
+                        break;
+                    case "2":
+                        InterrogateSuspect();
+                        timeLeft--;
+                        break;
+                    case "3":
+                        AnalyzeEvidence();
+                        timeLeft--;
+                        break;
+                    case "4":
+                        AccuseSuspect();
+                        timeLeft--;
+                        break;
+                    case "5":
+                        Console.WriteLine($"Ваш поточний рахунок: {score} балiв.\n");
+                        break;
+                    case "6":
+                        ShowEvidence();
+                        timeLeft--;
+                        break;
+                    case "7":
+                        ShowJournal();
+                        timeLeft--;
+                        break;
+                    case "8":
+                        GiveHint();
+                        break;
+                    case "9":
+                        ShowInventory();
+                        timeLeft--;
+                        break;
+                    case "10":
+                        UpgradeSkills();
+                        timeLeft--;
+                        break;
+                    case "11":
+                        SubmitSampleToLab();
+                        timeLeft--;
+                        break;
+                    case "12":
+                        Console.WriteLine("Гру завершено.");
+                        return;
+                    default:
+                        Console.WriteLine("Невiрний вибiр. Спробуйте ще раз.");
+                        break;
+                }
+
+                if (timeLeft == 0)
+                {
+                    Console.WriteLine("Час вичерпано! Справу не розкрито.");
+                }
+            }
+        }
